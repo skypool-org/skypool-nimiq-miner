@@ -1,6 +1,8 @@
 # Skypool Nimiq Miner
 
-See [release](https://github.com/skypool-org/skypool-nimiq-miner/releases)
+This is Nimqi mining client for [Skypool](https://nimiq.skypool.org).
+
+Download Nimiq mining client in [release](https://github.com/skypool-org/skypool-nimiq-miner/releases).
 
 # Update Log
 ## 2018-03-16 version 0.0.2
