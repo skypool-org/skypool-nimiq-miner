@@ -1,0 +1,27 @@
+{
+  "name": "skypool-nimiq-miner",
+  "version": "1.0.0",
+  "description": "Pool Miner for Nimiq",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/skypool-org/skypool-nimiq-miner.git"
+  },
+  "keywords": [
+    "nimiq",
+    "miner"
+  ],
+  "author": "Azard",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/skypool-org/skypool-nimiq-miner/issues"
+  },
+  "homepage": "https://github.com/skypool-org/skypool-nimiq-miner#readme",
+  "dependencies": {
+    "@nimiq/core": "^1.1.0",
+    "minimist": "^1.2.0"
+  }
+}
