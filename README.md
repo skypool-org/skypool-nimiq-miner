@@ -1,8 +1,14 @@
 # Skypool Nimiq Miner
 
-This is Nimqi mining client for [Skypool](https://nimiq.skypool.org).
+This is Nimiq mining client for [Skypool](https://nimiq.skypool.org).
 
 Download Nimiq mining client in [release](https://github.com/skypool-org/skypool-nimiq-miner/releases).
+
+Different version for different CPU instruction set
+* extreme --> avx512f
+* fast --> avx2
+* normal --> avx
+* compat --> non-avx
 
 # Update Log
 
