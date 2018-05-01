@@ -27,6 +27,8 @@ threads: 挖矿线程数，0 表示自动设置为 CPU 线程数减1
 host: 矿池节点地址
 port: 矿池节点端口
 isNano: 默认为 false，表示同步全部区块数据后开始挖矿，数据会保存在本地；设置为 true 会只同步最新区块数据。如果条件允许建议设置为 false 挖矿更稳定。
+
+使用 `skypool-node-client` 开始挖矿，第一次开始挖矿，同步需要花一段时间。
 */
 
 /*
@@ -37,6 +39,8 @@ threads: Miner thread, 0 denotes auto set to CPU_max_thread - 1
 host: Pool server host
 port: Pool server port
 isNano: default is false, denotes mining after sync all block chain data, data saved to local; Setting to true will only sync the latest part block chain data. In order to mining more stable, tt's recommend to set to false if possible.
+
+Run `skypool-node-client` to start mine, it will take time to sync when first mining.
 */
 
 
