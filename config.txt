@@ -1,0 +1,58 @@
+const config = 
+{
+  address: "NQ48 8CKH BA24 2VR3 N249 N8MN J5XX 74DB 5XJ8",
+  deviceId: 1,
+  threads: 0,
+  host: "sh0-nimiq.skypool.xyz",
+  port: 8444,
+  isNano: false,
+}
+
+/*
+矿池节点列表
+Host List:
+sh0-nimiq.skypool.xyz
+hk1-nimiq.skypool.xyz
+eu1-nimiq.skypool.xyz
+us2-nimiq.skypool.xyz
+
+All host port is 8444
+*/
+
+/*
+说明:
+address: 矿工钱包地址
+deviceId: 矿机编号，只能是数字（范围 0 到 2147483647），用于网站查询矿机状态
+threads: 挖矿线程数，0 表示自动设置为 CPU 线程数减1
+host: 矿池节点地址
+port: 矿池节点端口
+isNano: 默认为 false，表示同步全部区块数据后开始挖矿，数据会保存在本地；设置为 true 会只同步最新区块数据。如果条件允许建议设置为 false 挖矿更稳定。
+*/
+
+/*
+Description:
+address: Miner address
+deviceId: Miner device id, only number (range 0 to 2147483647), for query miner device status on website
+threads: Miner thread, 0 denotes auto set to CPU_max_thread - 1
+host: Pool server host
+port: Pool server port
+isNano: default is false, denotes mining after sync all block chain data, data saved to local; Setting to true will only sync the latest part block chain data. In order to mining more stable, tt's recommend to set to false if possible.
+*/
+
+
+
+/*
+种子节点，加快区块数据同步速度
+Seed peers, accelerate block data sync
+*/
+/*
+config.seedPeers = [
+  {
+    host: 'new-seed.nimiq.com',
+    port: 8080,
+    publicKey: 'e65e39616662f2c16d62dc08915e5a1d104619db8c2b9cf9b389f96c8dce9837',
+  },
+];
+*/
+
+module.exports = config;

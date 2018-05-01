@@ -1,25 +1,22 @@
 process.env.UV_THREADPOOL_SIZE = 128;
 const START = Date.now();
 const os = require('os');
+const util = require('util');
+const setTimeoutPromise = util.promisify(setTimeout);
 const Nimiq = require('@nimiq/core');
 const argv = require('minimist')(process.argv.slice(2));
 let config;
 
 async function logWithoutExit(text) {
     for (;;) {
-        Log.e(text);
+        Nimiq.Log.e(text);
         await setTimeoutPromise(5000);
     }
 }
 
-try {
-    config = require('./config.js');
-} catch(e) {
-    // macbook double click
-    let path = process.execPath;
-    path = `${path.slice(0, path.lastIndexOf('/'))}/config.js`;
-    config = require(path);
-}
+let path = process.execPath;
+path = `${path.slice(0, path.lastIndexOf('/'))}/config.txt`;
+config = require(path);
 
 config.address = argv.address || config.address;
 config.deviceId = argv.deviceId || config.deviceId;
@@ -61,8 +58,6 @@ for (const seedPeer of config.seedPeers) {
         logWithoutExit('Seed peers must have host and port attributes set');
     }
 }
-
-
 
 
 const TAG = 'Node';

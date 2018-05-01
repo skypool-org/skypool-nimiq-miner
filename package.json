@@ -4,8 +4,13 @@
   "description": "Pool Miner for Nimiq",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "pkg_mac_x64": "pkg . -t latest-macos-x64 -o skypool-node-client-mac-x64",
+    "pkg_win_x64": "pkg . -t latest-win-x64 -o skypool-node-client-win-x64",
+    "pkg_win_x86": "pkg . -t latest-win-x86 -o skypool-node-client-win-x86",
+    "pkg_linux_x64": "pkg . -t latest-linux-x64 -o skypool-node-client-linux-x64",
+    "pkg_linux_x86": "pkg . -t latest-linux-x86 -o skypool-node-client-linux-x86"
   },
+  "bin": "./index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/skypool-org/skypool-nimiq-miner.git"
