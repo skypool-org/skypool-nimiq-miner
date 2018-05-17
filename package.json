@@ -1,7 +1,7 @@
 {
   "name": "skypool-nimiq-miner",
-  "version": "2.0.0",
-  "description": "Pool Miner for Nimiq",
+  "version": "1.2.0",
+  "description": "Skypool nimiq miner client, self-designed directly pool mining protocol",
   "main": "index.js",
   "scripts": {
     "pkg_mac_x64": "pkg . -t latest-macos-x64 -o skypool-node-client-mac-x64",
@@ -15,18 +15,17 @@
     "type": "git",
     "url": "git+https://github.com/skypool-org/skypool-nimiq-miner.git"
   },
-  "keywords": [
-    "nimiq",
-    "miner"
-  ],
   "author": "Azard",
-  "license": "Apache-2.0",
+  "license": "Apache 2.0",
+  "dependencies": {
+    "@nimiq/core": "^1.1.2",
+    "atob": "^2.1.1",
+    "ip": "^1.1.5",
+    "minimist": "^1.2.0",
+    "uws": "^9.14.0"
+  },
   "bugs": {
     "url": "https://github.com/skypool-org/skypool-nimiq-miner/issues"
   },
-  "homepage": "https://github.com/skypool-org/skypool-nimiq-miner#readme",
-  "dependencies": {
-    "@nimiq/core": "^1.1.0",
-    "minimist": "^1.2.0"
-  }
+  "homepage": "https://github.com/skypool-org/skypool-nimiq-miner#readme"
 }

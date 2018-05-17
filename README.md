@@ -1,6 +1,8 @@
 # Skypool Nimiq Miner
 
-This is [Skypool](https://nimiq.skypool.org) Nimiq Miner Client, the client is compatible with all Nimiq Pool that using the official Nimiq pool mining protocol.
+This is [Skypool](https://nimiq.skypool.org) Nimiq Miner Client, using self-designed Nimiq mining protocol which is different to official p2p mining protocol, Skypool mining protocol get block data from server directly, which is more effieciency in bad netowork environment and need less client network bandwidth.
+
+**Note** : Skypool Nimiq Miner is only compatible with Skypool Nimiq Servers, the server code is not open source.
 
 Download Skypool Nimiq Mining Client in [release](https://github.com/skypool-org/skypool-nimiq-miner/releases).
 

@@ -1,161 +1,118 @@
 process.env.UV_THREADPOOL_SIZE = 128;
-const START = Date.now();
 const os = require('os');
+const fs = require('fs');
 const util = require('util');
+const ip = require('ip');
+const EventEmitter = require('events').EventEmitter;
+const Miner = require('./Miner.js');
+const Log = require('@nimiq/core').Log;
 const setTimeoutPromise = util.promisify(setTimeout);
-const Nimiq = require('@nimiq/core');
-const argv = require('minimist')(process.argv.slice(2));
-let config;
 
 async function logWithoutExit(text) {
     for (;;) {
-        Nimiq.Log.e(text);
-        await setTimeoutPromise(5000);
+        Log.e(text);
+        await setTimeoutPromise(2000);
     }
 }
 
-let path = process.execPath;
-path = `${path.slice(0, path.lastIndexOf('/'))}/config.txt`;
-config = require(path);
+let miner = null;
+let autoRestartInterval = null;
 
-config.address = argv.address || config.address;
-config.deviceId = argv.deviceId || config.deviceId;
-config.threads = argv.threads || config.threads;
-config.host = argv.host || config.host;
-config.port = argv.port || config.port;
-config.isNano = argv.isNano || config.isNano;
-
-const seedPeers = config.seedPeers;
-delete config.seedPeers;
-console.log(config);
-config.seedPeers = seedPeers || [];
-
-const isNano = config.isNano ? true : false;
-config.type = isNano ? 'nano' : 'full';
-
-let threads = parseInt(config.threads);
-const max_threads = os.cpus().length;
-if (threads > max_threads) {
-    Nimiq.Log.w(`threads ${threads} larger than CPU threads ${max_threads}, force thread to ${max_threads}`);
-    threads = max_threads;
-} else if (threads === 0) {
-    threads = max_threads > 1 ? max_threads - 1 : 1;
-    Nimiq.Log.i(`auto set thread to ${threads}`);
-}
-config.threads = threads;
-
-
-if (typeof config.deviceId !== 'number' || config.deviceId < 0 || config.deviceId > 2147483647) {
-    logWithoutExit('Error: deviceId should be number and between 0 to 2147483647');
-} else if (config.threads <= 0 || config.threads > 128) {
-    logWithoutExit('Error: thread too out of range, 0 to 128');
-} else if (config.address && config.address.length !== 44) {
-    logWithoutExit('Error: address format error');
-}
-
-for (const seedPeer of config.seedPeers) {
-    if (!seedPeer.host || !seedPeer.port) {
-        logWithoutExit('Seed peers must have host and port attributes set');
-    }
-}
-
-
-const TAG = 'Node';
-const $ = {};
-
-(async () => {
-    Nimiq.Log.i(TAG, `Skypool Nimiq Miner starting`);
-
-    Nimiq.GenesisConfig.init(Nimiq.GenesisConfig.CONFIGS['main']);
-
-    for(const seedPeer of config.seedPeers) {
-        Nimiq.GenesisConfig.SEED_PEERS.push(Nimiq.WsPeerAddress.seed(seedPeer.host, seedPeer.port, seedPeer.publicKey));
-    }
-
-    const networkConfig = new Nimiq.DumbNetworkConfig();
-
-    switch (config.type) {
-        case 'nano':
-            $.consensus = await Nimiq.Consensus.nano(networkConfig);
-            break;
-        default: // full
-            $.consensus = await Nimiq.Consensus.full(networkConfig);
-            break;
-    }
-
-    $.blockchain = $.consensus.blockchain;
-    $.accounts = $.blockchain.accounts;
-    $.mempool = $.consensus.mempool;
-    $.network = $.consensus.network;
-
-    Nimiq.Log.i(TAG, `Peer address: ${networkConfig.peerAddress.toString()} - public key: ${networkConfig.keyPair.publicKey.toHex()}`);
-
-    const address = Nimiq.Address.fromUserFriendlyAddress(config.address);
-    $.wallet = {address: address};
-    const account = !isNano ? await $.accounts.get($.wallet.address) : null;
-    Nimiq.Log.i(TAG, `Wallet initialized for address ${$.wallet.address.toUserFriendlyAddress()}.`
-        + (!isNano ? ` Balance: ${Nimiq.Policy.satoshisToCoins(account.balance)} NIM` : ''));
-
-    Nimiq.Log.i(TAG, `Blockchain state: height=${$.blockchain.height}, headHash=${$.blockchain.headHash}`);
-
-    const deviceId = config.deviceId;
-    const poolMode = isNano ? 'nano' : 'smart';
-    switch (poolMode) {
-        case 'nano':
-            $.miner = new Nimiq.NanoPoolMiner($.blockchain, $.network.time, $.wallet.address, deviceId);
-            break;
-        case 'smart':
-        default:
-            $.miner = new Nimiq.SmartPoolMiner($.blockchain, $.accounts, $.mempool, $.network.time, $.wallet.address, deviceId, new Uint8Array(0));
-            break;
-    }
-    $.consensus.on('established', () => {
-        Nimiq.Log.i(TAG, `Connecting to pool ${config.host} using device id ${deviceId} as a ${poolMode} client.`);
-        $.miner.connect(config.host, config.port);
-    });
-
-    $.blockchain.on('head-changed', (head) => {
-        if ($.consensus.established || head.height % 100 === 0) {
-            Nimiq.Log.i(TAG, `Now at block: ${head.height}`);
+async function main() {
+    let argv;
+    // case: Windows
+    if (os.platform() === 'win32') {
+        let path = process.execPath;
+        path = `${path.slice(0, path.lastIndexOf('\\'))}/config.txt`;
+        argv = require(path);
+    } else {
+        try {
+            // case: Linux & MacOS terminal run, dynamic to avoid packaing
+            argv = require('./' + 'config.txt');
+        } catch(e) {
+            // case: MacOS double click
+            let path = process.execPath;
+            path = `${path.slice(0, path.lastIndexOf('/'))}/config.txt`;
+            argv = require(path);
         }
+    }
+    const argvCmd = require('minimist')(process.argv.slice(2));
+    argv.address = argvCmd.address || argv.address;
+    argv.name = argvCmd.name || argv.name;
+    argv.thread = argvCmd.thread || argv.thread;
+    argv.percent = argvCmd.percent || argv.percent;
+    argv.server = argvCmd.server || argv.server;
+
+    console.log(argv);
+
+    if (!argv.address) {
+        await logWithoutExit('Usage: node index.js --address=<address> [--name=<name>] [--thread=<thread>] [--server=<server>] [--percent=<percent>]');
+    }
+
+    const address = argv.address;
+
+    let name = argv.name || '*';
+    // auto set name
+    if (name === '*') {
+        name = [ip.address(), os.platform(), os.arch(), os.release()].join(' ');
+        Log.w(`auto set name to ${name}`)
+    }
+
+    let thread = parseInt(argv.thread);
+    const max_thread = os.cpus().length;
+    if (thread > max_thread) {
+        Log.w(`thread ${thread} larger than CPU threads ${max_thread}, force thread to ${max_thread}`);
+        thread = max_thread;
+    }
+    if (thread === 0 || !Number.isInteger(thread)) {
+        thread = max_thread > 1 ? max_thread - 1 : 1;
+        Log.w(`auto set thread to ${thread}`);
+    }
+    const percent = parseFloat(argv.percent || 100);
+    const server = argv.server;
+    const event = new EventEmitter();
+
+    if (thread > 128) {
+        logWithoutExit('Error: thread too large');
+    } else if (thread <= 0) {
+        logWithoutExit('Error: thread too small');
+    } else if (address && address.length !== 44) {
+        logWithoutExit('Error: address format error');
+    } else if (name && name.length > 200) {
+        logWithoutExit('Error: name too long');
+    } else if (percent < 50 || percent > 100) {
+        logWithoutExit('Error: percent need between 50 to 100');
+    } else {
+        miner = new Miner(server, address, name, thread, percent, event);
+    }
+
+    event.on('client_old', () => {
+        clearInterval(autoRestartInterval);
+        miner.delete();
+        logWithoutExit('client version out of date, please download the latest mining client');
     });
-
-    $.network.on('peer-joined', (peer) => {
-        Nimiq.Log.i(TAG, `Connected to ${peer.peerAddress.toString()}`);
+    event.on('parameter_fail', () => {
+        clearInterval(autoRestartInterval);
+        miner.delete();
+        logWithoutExit('parameters incorrect, please update parameters and restart the client');
     });
-    $.network.on('peer-left', (peer) => {
-        Nimiq.Log.i(TAG, `Disconnected from ${peer.peerAddress.toString()}`);
-    });
+}
 
-    $.network.connect();
-    $.consensus.on('established', () => $.miner.startWork());
-    $.consensus.on('lost', () => $.miner.stopWork());
+// auto restart when 3 * 20s has 0 hashrate
+let zeroHashCount = 0;
+autoRestartInterval = setInterval(() => {
+    if (miner && miner._hashrateValue <= 0.01) {
+        Log.w('Hashrate is zero');
+        zeroHashCount++;
+    } else {
+        zeroHashCount = 0;
+    }
+    if (zeroHashCount >= 3) {
+        Log.w('Restart beacuse of zero hashrate');
+        zeroHashCount = 0;
+        miner.delete();
+        main();
+    }
+}, 20000);
 
-    $.miner.threads = config.threads;
-    $.miner.throttleAfter = Infinity;
-    $.miner.throttleWait = 1;
-
-    $.consensus.on('established', () => {
-        Nimiq.Log.i(TAG, `Blockchain ${config.type}-consensus established in ${(Date.now() - START) / 1000}s.`);
-        Nimiq.Log.i(TAG, `Current state: height=${$.blockchain.height}, totalWork=${$.blockchain.totalWork}, headHash=${$.blockchain.headHash}`);
-    });
-
-    $.miner.on('block-mined', (block) => {
-        Nimiq.Log.i(TAG, `Block mined: #${block.header.height}, hash=${block.header.hash()}`);
-    });
-
-    const hashrates = [];
-    const outputInterval = 10;
-    $.miner.on('hashrate-changed', async (hashrate) => {
-        hashrates.push(hashrate);
-        if (hashrates.length >= outputInterval) {
-            const sum = hashrates.reduce((acc, val) => acc + val, 0);
-            Nimiq.Log.i(TAG, `Hashrate: ${(sum / hashrates.length).toFixed(2).padStart(7)} H/s`);
-            hashrates.length = 0;
-        }
-    });
-
-})().catch(e => {
-    console.error(e);
-    logWithoutExit(e);
-});
+main();

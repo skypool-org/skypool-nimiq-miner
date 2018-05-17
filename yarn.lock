@@ -2,11 +2,11 @@
 # yarn lockfile v1
 
 
-"@nimiq/core@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@nimiq/core/-/core-1.1.0.tgz#d29da86e45a88bfba8703af5915195df32c8526b"
+"@nimiq/core@^1.1.2":
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@nimiq/core/-/core-1.1.2.tgz#b305e816f4b6657b25fdc17264cd696850020e5b"
   dependencies:
-    "@nimiq/jungle-db" "^0.9.11"
+    "@nimiq/jungle-db" "^0.9.14-alpha"
     atob "^2.0.3"
     bindings "^1.3.0"
     btoa "^1.1.2"
@@ -20,9 +20,9 @@
     bufferutil "^3.0.4"
     utf-8-validate "^4.0.1"
 
-"@nimiq/jungle-db@^0.9.11":
-  version "0.9.11"
-  resolved "https://registry.yarnpkg.com/@nimiq/jungle-db/-/jungle-db-0.9.11.tgz#bb8fef96bf542e346e6faf8160d6b330ee3ad9c7"
+"@nimiq/jungle-db@^0.9.14-alpha":
+  version "0.9.14-alpha"
+  resolved "https://registry.yarnpkg.com/@nimiq/jungle-db/-/jungle-db-0.9.14-alpha.tgz#65fe49bf345edb82cc6ec1666e18078ad6e0a32b"
   dependencies:
     atob "^2.0.3"
     btoa "^1.1.2"
@@ -30,7 +30,7 @@
     level-sublevel "^6.6.1"
     leveldown "^3.0.0"
     levelup "^2.0.2"
-    node-lmdb "0.5.1"
+    node-lmdb paberr/node-lmdb#af876c67055cc7cf0b3c1949e472484aa34410de
 
 abstract-leveldown@~0.12.1:
   version "0.12.4"
@@ -65,7 +65,7 @@ are-we-there-yet@~1.1.2:
     delegates "^1.0.0"
     readable-stream "^2.0.6"
 
-atob@^2.0.3:
+atob@^2.0.3, atob@^2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/atob/-/atob-2.1.1.tgz#ae2d5a729477f289d60dd7f96a6314a22dd6c22a"
 
@@ -255,6 +255,10 @@ ini@~1.3.0:
   version "1.3.5"
   resolved "https://registry.yarnpkg.com/ini/-/ini-1.3.5.tgz#eee25f56db1c9ec6085e0c22778083f596abf927"
 
+ip@^1.1.5:
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/ip/-/ip-1.1.5.tgz#bdded70114290828c0a039e72ef25f5aaec4354a"
+
 is-fullwidth-code-point@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/is-fullwidth-code-point/-/is-fullwidth-code-point-1.0.0.tgz#ef9e31386f031a7f0d643af82fde50c457ef00cb"
@@ -386,9 +390,9 @@ node-abi@^2.2.0:
   dependencies:
     semver "^5.4.1"
 
-node-lmdb@0.5.1:
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/node-lmdb/-/node-lmdb-0.5.1.tgz#a1ac3a8641ccd22512d0d8da17569547ef4b1a25"
+"node-lmdb@github:paberr/node-lmdb#af876c67055cc7cf0b3c1949e472484aa34410de":
+  version "0.5.4"
+  resolved "https://codeload.github.com/paberr/node-lmdb/tar.gz/af876c67055cc7cf0b3c1949e472484aa34410de"
   dependencies:
     bindings "^1.2.1"
     nan "^2.6.2"
