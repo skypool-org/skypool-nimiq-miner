@@ -9,16 +9,15 @@ const NodeNative = require('./node_modules/@nimiq/core/build/Release/nimiq_node.
 const P = require('./Protocol.js');
 const setTimeoutPromise = util.promisify(setTimeout);
 
-const RANGE = 256;
-const MAX_CURRENT_NONCE = 16777213; // UINT32_MAX / 256 - 2
-const WORKLOADS_PER_THREAD_PC = 1200; // 1 thread is 1200 * 256 nonces
+const RANGE = 4096;
+const WORKLOADS_PER_THREAD_PC = 75; // 1 thread is 75 * 4096 nonces
 const DIFFICULT_PER_THREAD_PC = 2; // 1 thread is 2 difficulty, one share equal to 2*thread*Math.pow(2 ,16) Hashes, 2*thread*65536
 
 class Miner {
 
     constructor(server, address, name, threads, percent, event) {
         /** miner metadata */
-        this._version = 7;
+        this._version = 8;
         this._platform = [os.platform(), os.arch(), os.release()].join(' ');
 
         this._address = address;
@@ -43,8 +42,8 @@ class Miner {
         /** current mining block */
         this._blockHeaderBase64 = null;
         this._compact = Nimiq.BlockUtils.difficultyToCompact(new BigNumber(threads * DIFFICULT_PER_THREAD_PC));
-        this._workrange256 = threads * WORKLOADS_PER_THREAD_PC;
-        this._workrange256pullThreshold = this._workrange256 / 2;
+        this._workrange4096 = threads * WORKLOADS_PER_THREAD_PC;
+        this._workrange4096pullThreshold = this._workrange4096 / 2;
         this._timeNonce36 = '0';
 
         /*
@@ -53,7 +52,7 @@ class Miner {
                 header,
                 timeNonce36,
                 index,
-                workrange256queue: []
+                workrange4096queue: []
             }
         ]
         */
@@ -153,8 +152,8 @@ class Miner {
 
     _onWorkRange(data) {
         Log.i(Miner, `receive workRange ${data[P.WorkRange_256]} Difficult ${data[P.WorkRange_Difficult]}`)
-        this._workrange256 = data[P.WorkRange_256];
-        this._workrange256pullThreshold = this._workrange256 / 2;
+        this._workrange4096 = data[P.WorkRange_256] / 16;
+        this._workrange4096pullThreshold = this._workrange4096 / 2;
         this._compact = Nimiq.BlockUtils.difficultyToCompact(new BigNumber(data[P.WorkRange_Difficult]));
     }
 
@@ -165,7 +164,7 @@ class Miner {
                 header,
                 timeNonce36,
                 index,
-                workrange256queue: []
+                workrange4096queue: []
             }
         ]
         */
@@ -175,10 +174,10 @@ class Miner {
         task.header = Uint8Array.from(atob(data[P.AssignJob_BlockHeaderBase64]), c => c.charCodeAt(0));
         task.timeNonce36 = data[P.AssignJob_TimeNonce36];
         task.index = data[P.AssignJob_Index];
-        task.workrange256queue = [];
-        let startNonce = parseInt(data[P.AssignJob_CurrentNonce36], 36);
-        for (let i = 0; i < this._workrange256; i++) {
-            task.workrange256queue.push(startNonce + i);
+        task.workrange4096queue = [];
+        let startNonce = parseInt(data[P.AssignJob_CurrentNonce36], 36) / 16;
+        for (let i = 0; i < this._workrange4096; i++) {
+            task.workrange4096queue.push(startNonce + i);
         }
         this._taskQueue.push(task);
         this._pulling = false;
@@ -196,10 +195,10 @@ class Miner {
         task.header = Uint8Array.from(atob(data[P.AssignJob_BlockHeaderBase64]), c => c.charCodeAt(0));
         task.timeNonce36 = data[P.PullBack_TimeNonce36];
         task.index = data[P.PullBack_Index];
-        task.workrange256queue = [];
-        let startNonce = parseInt(data[P.PullBack_CurrentNonce36], 36);
-        for (let i = 0; i < this._workrange256; i++) {
-            task.workrange256queue.push(startNonce + i);
+        task.workrange4096queue = [];
+        let startNonce = parseInt(data[P.PullBack_CurrentNonce36], 36) / 16;
+        for (let i = 0; i < this._workrange4096; i++) {
+            task.workrange4096queue.push(startNonce + i);
         }
         this._taskQueue.push(task);
         this._pulling = false;
@@ -288,17 +287,17 @@ class Miner {
                 continue;
             }
             const taskObject = this._taskQueue[0];
-            const startNonce256 = taskObject.workrange256queue.shift();
+            const startNonce4096 = taskObject.workrange4096queue.shift();
             // if this task run out
-            if (startNonce256 === undefined) {
+            if (startNonce4096 === undefined) {
                 this._taskQueue.shift();
                 continue;
             }
             // if this task run to threshold, pull next task
-            if (taskObject.workrange256queue.length === this._workrange256pullThreshold) {
+            if (taskObject.workrange4096queue.length === this._workrange4096pullThreshold) {
                 this._pull();
             }
-            const startNonce = startNonce256 * RANGE;
+            const startNonce = startNonce4096 * RANGE;
             const endNonce = startNonce + RANGE;
 
             percentTime = new Date();
