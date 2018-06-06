@@ -33,11 +33,11 @@ class Miner {
 
         // hashrate computing
         this._prevTime = new Date();
-        this._prevHashrate = 0; // previous 5s
+        this._prevHashrate = 0; // previous 10s
         this._currTime = new Date();
-        this._currHashrate = 0; // current  5s
+        this._currHashrate = 0; // current  10s
         this._hashrateValue = 0.0;
-        this._timer = setInterval(() => { this._hashrate(); }, 5000);
+        this._timer = setInterval(() => { this._hashrate(); }, 10000);
 
         /** current mining block */
         this._blockHeaderBase64 = null;
