@@ -43,7 +43,7 @@ class Miner {
         this._blockHeaderBase64 = null;
         this._compact = Nimiq.BlockUtils.difficultyToCompact(new BigNumber(threads * DIFFICULT_PER_THREAD_PC));
         this._workrange4096 = threads * WORKLOADS_PER_THREAD_PC;
-        this._workrange4096pullThreshold = this._workrange4096 / 2;
+        this._workrange4096pullThreshold = Math.round(this._workrange4096 / 2);
         this._timeNonce36 = '0';
 
         /*
@@ -153,7 +153,7 @@ class Miner {
     _onWorkRange(data) {
         Log.i(Miner, `receive workRange ${data[P.WorkRange_256]} Difficult ${data[P.WorkRange_Difficult]}`)
         this._workrange4096 = data[P.WorkRange_256] / 16;
-        this._workrange4096pullThreshold = this._workrange4096 / 2;
+        this._workrange4096pullThreshold = Math.round(this._workrange4096 / 2);
         this._compact = Nimiq.BlockUtils.difficultyToCompact(new BigNumber(data[P.WorkRange_Difficult]));
     }
 
