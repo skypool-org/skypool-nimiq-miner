@@ -17,6 +17,7 @@ async function logWithoutExit(text) {
 
 let miner = null;
 let autoRestartInterval = null;
+let switchInedx = 0;
 
 async function main() {
     let argv;
@@ -68,8 +69,21 @@ async function main() {
         thread = max_thread > 1 ? max_thread - 1 : 1;
         Log.w(`auto set thread to ${thread}`);
     }
+
+    // switch server
+    let server;
+    if (typeof argv.server === 'object') {
+        if (switchInedx >= argv.server.length) {
+            switchInedx = 0;
+        }
+        server = argv.server[switchInedx];
+        Log.w(`switch to server ${server}`);
+    } else {
+        server = argv.server;
+    }
+
+
     const percent = parseFloat(argv.percent || 100);
-    const server = argv.server;
     const event = new EventEmitter();
 
     if (thread > 128) {
@@ -111,6 +125,7 @@ autoRestartInterval = setInterval(() => {
         Log.w('Restart beacuse of zero hashrate');
         zeroHashCount = 0;
         miner.delete();
+        switchInedx += 1;
         main();
     }
 }, 20000);

@@ -1,5 +1,8 @@
 # Update Log
 
+## 2018-07-19 version 1.2.2
+* Auto select multi node server when disconnect
+
 ## 2018-06-06 version 1.2.1
 * Using big range (256 to 4096), improve hashrate
 
