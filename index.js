@@ -23,12 +23,18 @@ async function main() {
     let argv;
     // case: Windows
     if (os.platform() === 'win32') {
+      try {
+        // case: run by 'node index.js'
+        argv = require('./' + 'config.txt');
+      } catch(e) {
+        // case: run by exe
         let path = process.execPath;
-        path = `${path.slice(0, path.lastIndexOf('\\'))}/config.txt`;
+        path = `${path.slice(0, path.lastIndexOf('\\'))}\\config.txt`;
         argv = require(path);
+      }
     } else {
         try {
-            // case: Linux & MacOS terminal run, dynamic to avoid packaing
+            // case: Linux & MacOS terminal run, dynamic to avoid packaging
             argv = require('./' + 'config.txt');
         } catch(e) {
             // case: MacOS double click
