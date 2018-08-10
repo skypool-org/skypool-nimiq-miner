@@ -324,7 +324,7 @@ class Miner {
 
     _multiMine(blockHeader, compact, minNonce, maxNonce) {
         return new Promise((resolve, fail) => {
-            NodeNative.node_argon2_target_async(async (nonce) => {
+            NodeNative.node_argon2d_target_async(async (nonce) => {
                 try {
                     if (nonce === maxNonce) {
                         resolve(false);
@@ -334,7 +334,7 @@ class Miner {
                 } catch (e) {
                     fail(e);
                 }
-            }, blockHeader, compact, minNonce, maxNonce, 512);
+            }, blockHeader, compact, minNonce, maxNonce - minNonce, 512);
         });
     }
 
