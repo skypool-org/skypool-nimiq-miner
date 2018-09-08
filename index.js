@@ -7,6 +7,7 @@ const EventEmitter = require('events').EventEmitter;
 const Miner = require('./Miner.js');
 const Log = require('@nimiq/core').Log;
 const setTimeoutPromise = util.promisify(setTimeout);
+const exec = util.promisify(require('child_process').exec);
 
 async function logWithoutExit(text) {
     for (;;) {
@@ -49,11 +50,12 @@ async function main() {
     argv.thread = argvCmd.thread || argv.thread;
     argv.percent = argvCmd.percent || argv.percent;
     argv.server = argvCmd.server || argv.server;
+    argv.cpu = argvCmd.cpu || argv.cpu;
 
     console.log(argv);
 
     if (!argv.address) {
-        await logWithoutExit('Usage: node index.js --address=<address> [--name=<name>] [--thread=<thread>] [--server=<server>] [--percent=<percent>]');
+        await logWithoutExit('Usage: node index.js --address=<address> [--name=<name>] [--thread=<thread>] [--server=<server>] [--percent=<percent>] [--cpu=<cpu>]');
     }
 
     const address = argv.address;
@@ -92,6 +94,41 @@ async function main() {
     const percent = parseFloat(argv.percent || 100);
     const event = new EventEmitter();
 
+    // choose cpu version
+    let cpu = argv.cpu;
+    if (cpu === 'extreme' || cpu === 'fast' || cpu === 'normal' || cpu === 'compat') {
+        Log.w('CPU type given by user, choose ' + cpu + ' version.');
+    } else {
+        if (os.platform() === 'linux') {
+            const { stdout, stderr } = await exec('cat /proc/cpuinfo | grep flags');
+            if (stderr) {
+                cpu = 'compat';
+                Log.w('auto choose compat as default, unknown CPU');
+                Log.e(`error: ${stderr}`);
+            }
+            const flags = `${stdout}`;
+            if ((flags.indexOf('avx512f')) !== -1) {
+                cpu = 'extreme';
+                Log.w('auto choose extreme version, avx512f supported');
+            } else if ((flags.indexOf('avx2')) !== -1) {
+                cpu = 'fast';
+                Log.w('auto choose fast version, avx2 supported');
+            } else if ((flags.indexOf('avx')) !== -1) {
+                cpu = 'normal';
+                Log.w('auto choose normal version, avx supported');
+            } else {
+                cpu = 'compat';
+                Log.w('auto choose compat version as default, avx is not supported, ');
+            }
+        } else {
+            // TODO windows
+            cpu = 'compat';
+            Log.w('auto choose compat as default, unknown CPU');
+        }
+
+    }
+
+
     if (thread > 128) {
         logWithoutExit('Error: thread too large');
     } else if (thread <= 0) {
@@ -103,7 +140,7 @@ async function main() {
     } else if (percent < 50 || percent > 100) {
         logWithoutExit('Error: percent need between 50 to 100');
     } else {
-        miner = new Miner(server, address, name, thread, percent, event);
+        miner = new Miner(server, address, name, thread, percent, event, cpu);
     }
 
     event.on('client_old', () => {

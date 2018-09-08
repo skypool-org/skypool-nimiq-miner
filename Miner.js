@@ -5,7 +5,7 @@ const WebSocket = require('uws');
 const Nimiq = require('@nimiq/core');
 const Log = Nimiq.Log;
 const BigNumber = Nimiq.BigNumber;
-const NodeNative = require('./node_modules/@nimiq/core/build/Release/nimiq_node.node');
+let NodeNative;
 const P = require('./Protocol.js');
 const setTimeoutPromise = util.promisify(setTimeout);
 
@@ -15,7 +15,7 @@ const DIFFICULT_PER_THREAD_PC = 2; // 1 thread is 2 difficulty, one share equal 
 
 class Miner {
 
-    constructor(server, address, name, threads, percent, event) {
+    constructor(server, address, name, threads, percent, event, cpu) {
         /** miner metadata */
         this._version = 8;
         this._platform = [os.platform(), os.arch(), os.release()].join(' ');
@@ -60,6 +60,9 @@ class Miner {
 
         this._event = event;
         this._wsConnect(server);
+
+        const pathNodeNative = process.cwd() + '/lib/nimiq_node_' + cpu + '.node';
+        NodeNative = require(pathNodeNative);
     }
 
     delete() {
