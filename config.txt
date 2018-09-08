@@ -31,7 +31,6 @@ config.txt 配置说明：
 可选 server 节点列表:
 香港-0: ws://hk0.nimiq.skypool.org:4000
 香港-1: ws://hk1.nimiq.skypool.org:4000
-香港-1a: ws://hk1a.nimiq.skypool.org:5000
 上海-1: ws://sh1.nimiq.skypool.org:4000
 欧洲-1: ws://eu1.nimiq.skypool.org:4000
 美国-1: ws://us1.nimiq.skypool.org:4000
@@ -54,7 +53,6 @@ config.txt description：
 Server List:
 Hongkong-0: ws://hk0.nimiq.skypool.org:4000
 Hongkong-1: ws://hk1.nimiq.skypool.org:4000
-HongKong-1a: ws://hk1a.nimiq.skypool.org:5000
 Shanghai-1: ws://sh1.nimiq.skypool.org:4000
 Europe-1: ws://eu1.nimiq.skypool.org:4000
 USA-1: ws://us1.nimiq.skypool.org:4000

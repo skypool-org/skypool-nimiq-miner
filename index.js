@@ -1,6 +1,5 @@
 process.env.UV_THREADPOOL_SIZE = 128;
 const os = require('os');
-const fs = require('fs');
 const util = require('util');
 const ip = require('ip');
 const EventEmitter = require('events').EventEmitter;
@@ -8,6 +7,7 @@ const Miner = require('./Miner.js');
 const Log = require('@nimiq/core').Log;
 const setTimeoutPromise = util.promisify(setTimeout);
 const exec = util.promisify(require('child_process').exec);
+const CPUType = require('./CPUType');
 
 async function logWithoutExit(text) {
     for (;;) {
@@ -19,6 +19,35 @@ async function logWithoutExit(text) {
 let miner = null;
 let autoRestartInterval = null;
 let switchInedx = 0;
+
+const autoDetectCPU = async () => {
+    if (os.platform() === 'linux') {
+        const { stdout, stderr } = await exec('cat /proc/cpuinfo | grep flags');
+        if (stderr) {
+            Log.w('auto choose compat as default, unknown CPU');
+            Log.e(`error: ${stderr}`);
+            return CPUType.compat;
+        }
+        const flags = `${stdout}`;
+        if ((flags.indexOf('avx512f')) !== -1) {
+            Log.w('auto choose extreme version, avx512f supported');
+            return CPUType.extreme;
+        } else if ((flags.indexOf('avx2')) !== -1) {
+            Log.w('auto choose fast version, avx2 supported');
+            return CPUType.fast;
+        } else if ((flags.indexOf('avx')) !== -1) {
+            Log.w('auto choose normal version, avx supported');
+            return CPUType.normal;
+        } else {
+            Log.w('auto choose compat version as default, avx is not supported');
+            return CPUType.compat;
+        }
+    } else {
+        // TODO windows
+        Log.w('auto choose compat as default, unknown CPU');
+        return CPUType.compat;
+    }
+}
 
 async function main() {
     let argv;
@@ -95,39 +124,13 @@ async function main() {
     const event = new EventEmitter();
 
     // choose cpu version
-    let cpu = argv.cpu;
-    if (cpu === 'extreme' || cpu === 'fast' || cpu === 'normal' || cpu === 'compat') {
-        Log.w('CPU type given by user, choose ' + cpu + ' version.');
+    let cpu;
+    if (argv.cpu && CPUType[argv.cpu]) {
+        Log.w('CPU type given by user, choose ' + argv.cpu + ' version.');
+        cpu = CPUType[argv.cpu];
     } else {
-        if (os.platform() === 'linux') {
-            const { stdout, stderr } = await exec('cat /proc/cpuinfo | grep flags');
-            if (stderr) {
-                cpu = 'compat';
-                Log.w('auto choose compat as default, unknown CPU');
-                Log.e(`error: ${stderr}`);
-            }
-            const flags = `${stdout}`;
-            if ((flags.indexOf('avx512f')) !== -1) {
-                cpu = 'extreme';
-                Log.w('auto choose extreme version, avx512f supported');
-            } else if ((flags.indexOf('avx2')) !== -1) {
-                cpu = 'fast';
-                Log.w('auto choose fast version, avx2 supported');
-            } else if ((flags.indexOf('avx')) !== -1) {
-                cpu = 'normal';
-                Log.w('auto choose normal version, avx supported');
-            } else {
-                cpu = 'compat';
-                Log.w('auto choose compat version as default, avx is not supported, ');
-            }
-        } else {
-            // TODO windows
-            cpu = 'compat';
-            Log.w('auto choose compat as default, unknown CPU');
-        }
-
+        cpu = await autoDetectCPU();
     }
-
 
     if (thread > 128) {
         logWithoutExit('Error: thread too large');
