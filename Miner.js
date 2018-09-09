@@ -61,7 +61,8 @@ class Miner {
         this._event = event;
         this._wsConnect(server);
 
-        const pathNodeNative = process.cwd() + '/lib/nimiq_node_' + cpu + '.node';
+        const pathNodeNative = './node_modules/@nimiq/core/build/Release/nimiq_node_' + cpu + '.node';
+        // const pathNodeNative = process.cwd() + '/lib/nimiq_node_' + cpu + '.node';
         NodeNative = require(pathNodeNative);
     }
 

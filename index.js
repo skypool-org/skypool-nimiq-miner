@@ -43,9 +43,10 @@ const autoDetectCPU = async () => {
             return CPUType.compat;
         }
     } else {
-        // TODO windows
-        Log.w('auto choose compat as default, unknown CPU');
-        return CPUType.compat;
+        const addon = require('./build/Release/detectCPU');
+        const cpu = addon.detectCPU();
+        Log.w('auto choose ' + cpu + ' version');
+        return CPUType[cpu];
     }
 }
 
