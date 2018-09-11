@@ -48,7 +48,7 @@ const autoDetectCPU = async () => {
         Log.w('auto choose ' + cpu + ' version');
         return CPUType[cpu];
     }
-}
+};
 
 async function main() {
     let argv;
