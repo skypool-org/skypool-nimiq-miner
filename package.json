@@ -22,7 +22,7 @@
     "atob": "^2.1.1",
     "ip": "^1.1.5",
     "minimist": "^1.2.0",
-    "uws": "9.148.0"
+    "uws": "10.148.1"
   },
   "bugs": {
     "url": "https://github.com/skypool-org/skypool-nimiq-miner/issues"

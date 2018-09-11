@@ -1,7 +1,4 @@
 #include <node.h>
-//#include <immintrin.h>
-//#include <avx2intrin.h>
-#include <intrin.h>
 #include "cpuid.h"
 namespace demo {
 

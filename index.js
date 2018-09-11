@@ -21,33 +21,10 @@ let autoRestartInterval = null;
 let switchInedx = 0;
 
 const autoDetectCPU = async () => {
-    if (os.platform() === 'linux') {
-        const { stdout, stderr } = await exec('cat /proc/cpuinfo | grep flags');
-        if (stderr) {
-            Log.w('auto choose compat as default, unknown CPU');
-            Log.e(`error: ${stderr}`);
-            return CPUType.compat;
-        }
-        const flags = `${stdout}`;
-        if ((flags.indexOf('avx512f')) !== -1) {
-            Log.w('auto choose extreme version, avx512f supported');
-            return CPUType.extreme;
-        } else if ((flags.indexOf('avx2')) !== -1) {
-            Log.w('auto choose fast version, avx2 supported');
-            return CPUType.fast;
-        } else if ((flags.indexOf('avx')) !== -1) {
-            Log.w('auto choose normal version, avx supported');
-            return CPUType.normal;
-        } else {
-            Log.w('auto choose compat version as default, avx is not supported');
-            return CPUType.compat;
-        }
-    } else {
-        const addon = require('./build/Release/detectCPU');
-        const cpu = addon.detectCPU();
-        Log.w('auto choose ' + cpu + ' version');
-        return CPUType[cpu];
-    }
+    const addon = require('./build/Release/detectCPU');
+    const cpu = addon.detectCPU();
+    Log.w('auto choose ' + cpu + ' version');
+    return CPUType[cpu];
 };
 
 async function main() {

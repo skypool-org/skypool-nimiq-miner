@@ -3,7 +3,8 @@
 
 #ifdef _WIN32
 #include <limits.h>
-#include <intrin.h>
+//#include <intrin.h>
+#include <x86intrin.h>
 typedef unsigned __int32  uint32_t;
 
 #else
