@@ -4,6 +4,7 @@ const config =
   "name": "*",
   "thread": 0,
   "percent": 100,
+  "cpu": "auto",
   "server": [
     "ws://hk0.nimiq.skypool.org:4000",
     "ws://hk1.nimiq.skypool.org:4000",
@@ -24,12 +25,12 @@ config.txt 配置说明：
 * name: 机器编号，用于网页查看每台机器的详细情况，设置为 * 自动设定名字。
 * thread: 挖矿线程数，设置为 CPU 核数即所有核都挖矿，如果想在挖矿的同时使用电脑，建议设置为 CPU 核数减 1。默认为 0，表示 CPU 核数减 1。
 * percent: CPU 输出百分比，100 即为 100% 全力挖矿，范围 50 到 100。
+* cpu: CPU 支持的指令集架构，分为 "extreme"(avx512f) | "fast"(avx2) | "normal"(avx) | "compat" | "auto"(自动检测)
 * server: 天池节点地址，请选择以下节点。如设置多个节点则会在断线的时候按顺序切换。
 
 可选 server 节点列表:
 香港-0: ws://hk0.nimiq.skypool.org:4000
 香港-1: ws://hk1.nimiq.skypool.org:4000
-香港-1a: ws://hk1a.nimiq.skypool.org:5000
 上海-1: ws://sh1.nimiq.skypool.org:4000
 欧洲-1: ws://eu1.nimiq.skypool.org:4000
 美国-1: ws://us1.nimiq.skypool.org:4000
@@ -46,12 +47,12 @@ config.txt description：
 * name: mining machine name, used for skypool web page to see details for each machine, setting to * is auto setting name.
 * thread:  number of mining CPU threads. If set to the number of your threads, it means fully mining. If you want to use the computer while mining, it is recommended to set the number of CPU threads minus 1. Default is 0, 0 means CPU threads minus 1.
 * percent: percentage of CPU usage, 100 is 100% full mining, ranging from 50 to 100.
+* cpu: CPU Instruction Set Architecture (ISA), "extreme"(avx512f) | "fast"(avx2) | "normal"(avx) | "compat" | "auto"(auto detected)
 * server: node address of Skypool mining servers as follows. Multi node servers will be auto selected when disconnect.
 
 Server List:
 Hongkong-0: ws://hk0.nimiq.skypool.org:4000
 Hongkong-1: ws://hk1.nimiq.skypool.org:4000
-HongKong-1a: ws://hk1a.nimiq.skypool.org:5000
 Shanghai-1: ws://sh1.nimiq.skypool.org:4000
 Europe-1: ws://eu1.nimiq.skypool.org:4000
 USA-1: ws://us1.nimiq.skypool.org:4000

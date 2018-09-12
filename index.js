@@ -1,12 +1,13 @@
 process.env.UV_THREADPOOL_SIZE = 128;
 const os = require('os');
-const fs = require('fs');
 const util = require('util');
 const ip = require('ip');
 const EventEmitter = require('events').EventEmitter;
 const Miner = require('./Miner.js');
 const Log = require('@nimiq/core').Log;
 const setTimeoutPromise = util.promisify(setTimeout);
+const exec = util.promisify(require('child_process').exec);
+const CPUType = require('./CPUType');
 
 async function logWithoutExit(text) {
     for (;;) {
@@ -18,6 +19,13 @@ async function logWithoutExit(text) {
 let miner = null;
 let autoRestartInterval = null;
 let switchInedx = 0;
+
+const autoDetectCPU = async () => {
+    const addon = require('./build/Release/detectCPU');
+    const cpu = addon.detectCPU();
+    Log.w('auto choose ' + cpu + ' version');
+    return CPUType[cpu];
+};
 
 async function main() {
     let argv;
@@ -49,11 +57,12 @@ async function main() {
     argv.thread = argvCmd.thread || argv.thread;
     argv.percent = argvCmd.percent || argv.percent;
     argv.server = argvCmd.server || argv.server;
+    argv.cpu = argvCmd.cpu || argv.cpu;
 
     console.log(argv);
 
     if (!argv.address) {
-        await logWithoutExit('Usage: node index.js --address=<address> [--name=<name>] [--thread=<thread>] [--server=<server>] [--percent=<percent>]');
+        await logWithoutExit('Usage: node index.js --address=<address> [--name=<name>] [--thread=<thread>] [--server=<server>] [--percent=<percent>] [--cpu=<cpu>]');
     }
 
     const address = argv.address;
@@ -92,6 +101,15 @@ async function main() {
     const percent = parseFloat(argv.percent || 100);
     const event = new EventEmitter();
 
+    // choose cpu version
+    let cpu;
+    if (argv.cpu && CPUType[argv.cpu]) {
+        Log.w('CPU type given by user, choose ' + argv.cpu + ' version.');
+        cpu = CPUType[argv.cpu];
+    } else {
+        cpu = await autoDetectCPU();
+    }
+
     if (thread > 128) {
         logWithoutExit('Error: thread too large');
     } else if (thread <= 0) {
@@ -103,7 +121,7 @@ async function main() {
     } else if (percent < 50 || percent > 100) {
         logWithoutExit('Error: percent need between 50 to 100');
     } else {
-        miner = new Miner(server, address, name, thread, percent, event);
+        miner = new Miner(server, address, name, thread, percent, event, cpu);
     }
 
     event.on('client_old', () => {
