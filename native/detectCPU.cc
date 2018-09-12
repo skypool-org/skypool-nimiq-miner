@@ -13,6 +13,12 @@ void Method(const FunctionCallbackInfo<Value>& args) {
   Isolate* isolate = args.GetIsolate();
   CPUID cpuID1(7); // Get CPU vendor
   uint32_t n1 = cpuID1.EBX();
+  #ifdef linux
+  if ((n1 >> 16 & 1) == 1) {
+      args.GetReturnValue().Set(String::NewFromUtf8(isolate, "extreme"));
+      return;
+  }
+  #endif
   if ((n1 >> 5 & 1) == 1) {
     args.GetReturnValue().Set(String::NewFromUtf8(isolate, "fast"));
     return;
