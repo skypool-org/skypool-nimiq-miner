@@ -1,7 +1,7 @@
 const util = require('util');
 const os = require('os');
 const atob = require('atob');
-const WebSocket = require('uws');
+const WebSocketClient = require('websocket').client;
 const Nimiq = require('@nimiq/core');
 const Log = Nimiq.Log;
 const BigNumber = Nimiq.BigNumber;
@@ -61,70 +61,79 @@ class Miner {
         this._event = event;
         this._wsConnect(server);
 
-        // const pathNodeNative = './node_modules/@nimiq/core/build/Release/nimiq_node_' + cpu + '.node';
-        const pathNodeNative = process.cwd() + '/lib/nimiq_node_' + cpu + '.node';
+        let pathNodeNative = './node_modules/@nimiq/core/build/Release/nimiq_node.node';
+        if (global.skypool_package) {
+            pathNodeNative = process.cwd() + '/lib/nimiq_node_' + cpu + '.node';
+        }
         NodeNative = require(pathNodeNative);
     }
 
     delete() {
         if (this._ws) {
             this._ws.close();
-            delete this._ws;
         }
         clearInterval(this._timer);
         this._mining = false;
     }
 
     _wsConnect(server) {
-        this._ws = new WebSocket(server);
-        this._ws.on('open', () => {
+        this._wsClient = new WebSocketClient();
+        this._wsClient.on('connect', connection => {
+            this._ws = connection;
+
             Log.i(Miner, `connect pool success ${server}`);
             this._register();
+
+            this._ws.on('message', (data) => {
+                if (data.type !== 'utf8') {
+                    console.log('ws message type error: ' + JSON.stringify(data));
+                    return;
+                }
+                const msg = JSON.parse(data.utf8Data);
+                switch(msg.t) {
+                    case P.RegisterBack: {
+                        this._onRegisterBack(msg.d);
+                        break;
+                    }
+                    case P.WorkRange: {
+                        this._onWorkRange(msg.d);
+                        break;
+                    }
+                    case P.AssignJob: {
+                        this._onAssignJob(msg.d);
+                        break;
+                    }
+                    case P.PullBack: {
+                        this._onPullBack(msg.d);
+                        break;
+                    }
+                    case P.CloseBanIP: {
+                        Log.w(Miner, 'miner IP has been banned');
+                        break;
+                    }
+                    case P.CloseFirewall: {
+                        Log.w(Miner, 'pool firewall close this miner');
+                        break;
+                    }
+                    case P.Exit: {
+                        process.exit(0);
+                        break;
+                    }
+                }
+            });
+
+            this._ws.on('error', e => {
+                Log.w(Miner, `connect pool error ${server}`);
+                console.log(e);
+            });
+
+            this._ws.on('close', () => {
+                Log.w(Miner, `closed pool connection`);
+                this._mining = false;
+            });
         });
 
-        this._ws.on('message', (data) => {
-            const msg = JSON.parse(data);
-            switch(msg.t) {
-                case P.RegisterBack: {
-                    this._onRegisterBack(msg.d);
-                    break;
-                }
-                case P.WorkRange: {
-                    this._onWorkRange(msg.d);
-                    break;
-                }
-                case P.AssignJob: {
-                    this._onAssignJob(msg.d);
-                    break;
-                }
-                case P.PullBack: {
-                    this._onPullBack(msg.d);
-                    break;
-                }
-                case P.CloseBanIP: {
-                    Log.w(Miner, 'miner IP has been banned');
-                    break;
-                }
-                case P.CloseFirewall: {
-                    Log.w(Miner, 'pool firewall close this miner');
-                    break;
-                }
-                case P.Exit: {
-                    process.exit(0);
-                    break;
-                }
-            }
-        });
-        
-        this._ws.on('error', (e) => {
-            Log.w(Miner, `connect pool error ${server}`);
-            console.log(e);
-        });
-
-        this._ws.on('close', (e) => {
-            Log.w(Miner, `closed pool connection, ${e}`);
-            this._mining = false;
-        });
+        this._wsClient.connect(server, null);
     }
 
 
@@ -227,7 +236,7 @@ class Miner {
             },
         };
         Log.i(Miner, 'send register');
-        this._ws.send(JSON.stringify(data));
+        this._ws.sendUTF(JSON.stringify(data));
     }
 
     _pull() {
@@ -235,14 +244,14 @@ class Miner {
             return;
         }
         this._pulling = true;
-        this._ws.send(JSON.stringify({
+        this._ws.sendUTF(JSON.stringify({
             t: P.Pull,
         }));
     }
 
     _push(timeNonce36, nonce, index) {
         // push
-        this._ws.send(JSON.stringify({
+        this._ws.sendUTF(JSON.stringify({
             t: P.Push,
             d: {
                 [P.Push_TimeNonce36]: timeNonce36,
@@ -327,19 +336,35 @@ class Miner {
     }
 
     _multiMine(blockHeader, compact, minNonce, maxNonce) {
-        return new Promise((resolve, fail) => {
-            NodeNative.node_argon2d_target_async(async (nonce) => {
-                try {
-                    if (nonce === maxNonce) {
-                        resolve(false);
-                    } else {
-                        resolve({nonce});
+        if (global.skypool_package) {
+            return new Promise((resolve, fail) => {
+                NodeNative.node_argon2d_target_async(async (nonce) => {
+                    try {
+                        if (nonce === maxNonce) {
+                            resolve(false);
+                        } else {
+                            resolve({nonce});
+                        }
+                    } catch (e) {
+                        fail(e);
                     }
-                } catch (e) {
-                    fail(e);
-                }
-            }, blockHeader, compact, minNonce, maxNonce - minNonce, 512);
-        });
+                }, blockHeader, compact, minNonce, maxNonce - minNonce, 512);
+            });
+        } else {
+            return new Promise((resolve, fail) => {
+                NodeNative.node_argon2_target_async(async (nonce) => {
+                    try {
+                        if (nonce === maxNonce) {
+                            resolve(false);
+                        } else {
+                            resolve({nonce});
+                        }
+                    } catch (e) {
+                        fail(e);
+                    }
+                }, blockHeader, compact, minNonce, maxNonce, 512);
+            }); 
+        }
     }
 
     _hashrate() {

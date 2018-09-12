@@ -1,3 +1,6 @@
+// for special packaging by skypool owners
+global.skypool_package = false;
+
 process.env.UV_THREADPOOL_SIZE = 128;
 const os = require('os');
 const util = require('util');
@@ -6,7 +9,6 @@ const EventEmitter = require('events').EventEmitter;
 const Miner = require('./Miner.js');
 const Log = require('@nimiq/core').Log;
 const setTimeoutPromise = util.promisify(setTimeout);
-const exec = util.promisify(require('child_process').exec);
 const CPUType = require('./CPUType');
 
 async function logWithoutExit(text) {

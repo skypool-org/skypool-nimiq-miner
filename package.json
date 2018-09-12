@@ -1,6 +1,6 @@
 {
   "name": "skypool-nimiq-miner",
-  "version": "1.3.0",
+  "version": "1.3.3",
   "description": "Skypool nimiq miner client, self-designed directly pool mining protocol",
   "main": "index.js",
   "scripts": {
@@ -18,11 +18,11 @@
   "author": "Azard",
   "license": "Apache 2.0",
   "dependencies": {
-    "@nimiq/core": "^1.2.0",
+    "@nimiq/core": "^1.3.1",
     "atob": "^2.1.1",
     "ip": "^1.1.5",
     "minimist": "^1.2.0",
-    "uws": "10.148.1"
+    "websocket": "^1.0.26"
   },
   "bugs": {
     "url": "https://github.com/skypool-org/skypool-nimiq-miner/issues"
