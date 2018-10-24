@@ -63,7 +63,7 @@ class Miner {
 
         let pathNodeNative = './node_modules/@nimiq/core/build/Release/nimiq_node.node';
         if (global.skypool_package) {
-            pathNodeNative = process.cwd() + '/lib/nimiq_node_' + cpu + '.node';
+            pathNodeNative = __dirname + '/lib/nimiq_node_' + cpu + '.node';
         }
         NodeNative = require(pathNodeNative);
     }
