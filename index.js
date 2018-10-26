@@ -86,6 +86,10 @@ async function main() {
         thread = max_thread > 1 ? max_thread - 1 : 1;
         Log.w(`auto set thread to ${thread}`);
     }
+    if (thread < 0) {
+        thread = max_thread;
+        Log.w(`auto set thread to ${thread}`);
+    }
 
     // switch server
     let server;
