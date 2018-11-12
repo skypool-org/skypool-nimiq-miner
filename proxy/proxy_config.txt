@@ -1,0 +1,7 @@
+const config =
+{
+  "port": 8080,
+  "address": "",
+  "server": "ws://hk0.nimiq.skypool.org:4000",
+}
+module.exports = config;

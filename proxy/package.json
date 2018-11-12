@@ -1,0 +1,27 @@
+{
+  "name": "skypool-nimiq-miner-proxy",
+  "version": "1.0.0",
+  "description": "A proxy for Skypool nimiq miner client",
+  "main": "proxy.js",
+  "scripts": {
+    "pkg_linux_proxy": "pkg . -t latest-linux-x64 -o skypool-node-proxy-linux-x64",
+    "pkg_mac_proxy": "pkg . -t latest-macos-x64 -o skypool-node-proxy-macos-x64"
+  },
+  "bin": "./proxy.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/skypool-org/skypool-nimiq-miner.git"
+  },
+  "author": "Azard",
+  "license": "Apache 2.0",
+  "dependencies": {
+    "atob": "^2.1.1",
+    "ip": "^1.1.5",
+    "minimist": "^1.2.0",
+    "websocket": "^1.0.26"
+  },
+  "bugs": {
+    "url": "https://github.com/skypool-org/skypool-nimiq-miner/issues"
+  },
+  "homepage": "https://github.com/skypool-org/skypool-nimiq-miner#readme"
+}
