@@ -37,20 +37,20 @@ async function main() {
     argv = require(path);
   }
   const argvCmd = require('minimist')(process.argv.slice(2));
-  argv.address = argvCmd.address || argv.address;
+  argv.miningAddress = argvCmd.miningAddress || argv.miningAddress;
   argv.server = argvCmd.server || argv.server;
-  argv.port = argvCmd.port || argv.port;
+  argv.proxyServerPort = argvCmd.proxyServerPort || argv.proxyServerPort;
 
   console.log(argv);
 
   // parse port
-  if (!argv.port) {
-    await logWithoutExit('Usage: node index.js --port=<port> --server=<server> [--address=<address>]');
+  if (!argv.proxyServerPort) {
+    await logWithoutExit('Usage: node index.js --proxyServerPort=<proxyServerPort> --server=<server> [--miningAddress=<miningAddress>]');
   }
-  const proxyPort = argv.port;
+  const proxyPort = argv.proxyServerPort;
 
   // parse address
-  const miningAddress = argv.address;
+  const miningAddress = argv.miningAddress;
   if (miningAddress && miningAddress.length !== 44) {
     await logWithoutExit('Error: address format error');
   }
@@ -82,7 +82,6 @@ async function main() {
     let downstream = request.accept( null, request.origin);
     let upstream;
     let msgQueue = [];
-    let switchInedx = 0;
     connectionNumber++;
 
     // 连接天池服务器ws
@@ -126,7 +125,6 @@ async function main() {
     downstream.on('message', async (message) => {
       if (message.type === 'utf8') {
         // console.log('Received Message: ' + message.utf8Data);
-        // connection.sendUTF(message.utf8Data);
 
         let data = message.utf8Data;
 
@@ -136,7 +134,6 @@ async function main() {
           json.d[P.Register_Address] = miningAddress;
           data = JSON.stringify(json);
         }
-
 
         // 如果 upstream 还未初始化，就先将消息存放进缓存；否则就转发
         if (upstream === undefined) {
