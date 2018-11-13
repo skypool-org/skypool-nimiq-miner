@@ -1,0 +1,41 @@
+const config =
+{
+  "proxyServerPort": 8080,
+  "server": "ws://hk0.nimiq.skypool.org:4000",
+  "miningAddress": "",
+}
+module.exports = config;
+
+/*
+修改 proxy_config.txt 配置文件，使用命令 `node proxy.js` 开启代理。
+
+proxy_config.txt 配置说明：
+
+* proxyServerPort: 代理节点端口号。
+* server: 天池节点地址，请选择以下节点。目前仅支持单节点。
+* address(可选): 钱包地址，挖矿收益会定期转账到该地址。
+注意：不填则为挖矿软件设置的钱包地址，填写后忽略挖矿软件填写的地址并强制修改为此地址。
+
+可选 server 节点列表:
+香港-0: ws://hk0.nimiq.skypool.org:4000
+上海-1: ws://sh1.nimiq.skypool.org:4000
+欧洲-1: ws://eu1.nimiq.skypool.org:4000
+美国-1: ws://us1.nimiq.skypool.org:4000
+*/
+
+/*
+Modify config.txt file, run `node proxy.js` to start proxy.
+
+proxy_config.txt description：
+
+* proxyServerPort: proxy port.
+* server: node address of Skypool mining servers as follows. Only support single server currently.
+* address(optimal): wallet address, mining reward will send to this address automatically.
+Hint: If you do not set this value, the mining address will be determined by mining client; if you set this value, the mining address will be forced to this value, ignoring the mining client's setting.
+
+Server List:
+Hongkong-0: ws://hk0.nimiq.skypool.org:4000
+Shanghai-1: ws://sh1.nimiq.skypool.org:4000
+Europe-1: ws://eu1.nimiq.skypool.org:4000
+USA-1: ws://us1.nimiq.skypool.org:4000
+*/
