@@ -5,7 +5,7 @@ const util = require('util');
 const setTimeoutPromise = util.promisify(setTimeout);
 const P = require('../Protocol.js');
 
-// 记录当前连接状态
+// record connected status
 let connectionNumber = 0;
 setInterval(() => { printConnectionNumber(); }, 10000);
 
@@ -84,7 +84,7 @@ async function main() {
     let msgQueue = [];
     connectionNumber++;
 
-    // 连接天池服务器ws
+    // connect to skypool node websocket
     const client = new WebSocketClient();
 
     client.on('connectFailed', (error) => {
@@ -93,7 +93,7 @@ async function main() {
 
     client.on('connect', (connection) => {
       upstream = connection;
-      // 将缓存的消息转发给天池 server
+      // send cached msg to skypool server
       if (msgQueue.length !== 0) {
         for (let i = 0; i < msgQueue.length; i++) {
           upstream.sendUTF(msgQueue[i]);
@@ -107,7 +107,7 @@ async function main() {
       });
       connection.on('close', () => {
         console.warn(getTime() + 'Skypool server Connection Closed');
-        // 服务端关闭后，关闭客户端连接
+        // close client connection after server connection close
         downstream.close();
       });
       connection.on('message', (message) => {
@@ -135,7 +135,7 @@ async function main() {
           data = JSON.stringify(json);
         }
 
-        // 如果 upstream 还未初始化，就先将消息存放进缓存；否则就转发
+        // is upstream is not initialized, cache the msg to a queue; otherwise send it to server
         if (upstream === undefined) {
           // console.log(getTime() + 'push msg' + data);
           msgQueue.push(data);
@@ -147,7 +147,7 @@ async function main() {
     });
     downstream.on('close', (reasonCode, description) => {
       console.warn(getTime() + 'Peer ' + downstream.remoteAddress + ' disconnected.');
-      // 客户端关闭后，关闭服务端连接
+      // close server connection after client connection close
       upstream.close();
       connectionNumber--;
     });
