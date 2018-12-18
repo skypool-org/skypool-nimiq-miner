@@ -12,6 +12,11 @@ In the release page, different version for different CPU instruction set to get 
 * normal --> avx
 * compat --> non-avx
 
+## Usage
+``` bash
+node index.js --address=<address> [--name=<name>] [--thread=<thread>] [--server=<server>] [--percent=<percent>] [--cpu=<cpu>]
+```
+
 ## Building by Yourself
 
 1. Install [Node.js](https://nodejs.org) v8.0.0 or higher.
@@ -38,6 +43,9 @@ In the release page, different version for different CPU instruction set to get 
 2. Start Proxy on an unblocked cloud server, with a public ip (for example, `1.2.3.4`)
 3. Configure the Skypool Nimiq Miner's config file, and change `server` value to `"server": "ws://1.2.3.4:8080",`
 4. Start mining now, you can see logs in proxy to see the number of connected miners
+``` bash
+node index.js --proxyServerPort=<proxyServerPort> --server=<server> [--miningAddress=<miningAddress>]```
+```
 
 ## Build by yourself
 1. Install [Node.js](https://nodejs.org/) v8.0.0 or higher.
