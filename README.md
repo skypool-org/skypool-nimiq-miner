@@ -29,6 +29,7 @@ node index.js --address=<address> [--name=<name>] [--thread=<thread>] [--server=
 6. Build the project: `cd skypool-nimiq-miner && yarn`.
 7. Config `config.txt`, Run `node index.js`.
 
+---
 
 # Skypool Nimiq Proxy
 
@@ -44,7 +45,7 @@ node index.js --address=<address> [--name=<name>] [--thread=<thread>] [--server=
 3. Configure the Skypool Nimiq Miner's config file, and change `server` value to `"server": "ws://1.2.3.4:8080",`
 4. Start mining now, you can see logs in proxy to see the number of connected miners
 ``` bash
-node index.js --proxyServerPort=<proxyServerPort> --server=<server> [--miningAddress=<miningAddress>]```
+node index.js --proxyServerPort=<proxyServerPort> --server=<server> [--miningAddress=<miningAddress>]
 ```
 
 ## Build by yourself
