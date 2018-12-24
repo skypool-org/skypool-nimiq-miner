@@ -5,6 +5,7 @@
   "main": "proxy.js",
   "scripts": {
     "pkg_linux_proxy": "pkg . -t latest-linux-x64 -o skypool-node-proxy-linux-x64",
+    "pkg_win_proxy": "pkg . -t latest-win-x86 -o skypool-node-client-win-x86",
     "pkg_mac_proxy": "pkg . -t latest-macos-x64 -o skypool-node-proxy-macos-x64"
   },
   "bin": "./proxy.js",

@@ -1,6 +1,7 @@
 const WebSocketServer = require('websocket').server;
 const WebSocketClient = require('websocket').client;
 const http = require('http');
+const os = require('os');
 const util = require('util');
 const setTimeoutPromise = util.promisify(setTimeout);
 const P = require('../Protocol.js');
@@ -27,15 +28,28 @@ function getTime() {
 
 async function main() {
   let argv;
-  try {
-    // case: Linux & MacOS terminal run, dynamic to avoid packaging
-    argv = require('./' + 'proxy_config.txt');
-  } catch(e) {
-    // case: MacOS double click
-    let path = process.execPath;
-    path = `${path.slice(0, path.lastIndexOf('/'))}/proxy_config.txt`;
-    argv = require(path);
+  if (os.platform() === 'win32') {
+      try {
+        // case: run by 'node index.js'
+        argv = require('./' + 'proxy_config.txt');
+      } catch(e) {
+        // case: run by exe
+        let path = process.execPath;
+        path = `${path.slice(0, path.lastIndexOf('\\'))}\\proxy_config.txt`;
+        argv = require(path);
+      }
+  } else {
+      try {
+        // case: Linux & MacOS terminal run, dynamic to avoid packaging
+        argv = require('./' + 'proxy_config.txt');
+      } catch(e) {
+        // case: MacOS double click
+        let path = process.execPath;
+        path = `${path.slice(0, path.lastIndexOf('/'))}/proxy_config.txt`;
+        argv = require(path);
+      }
   }
+  
   const argvCmd = require('minimist')(process.argv.slice(2));
   argv.miningAddress = argvCmd.miningAddress || argv.miningAddress;
   argv.server = argvCmd.server || argv.server;
