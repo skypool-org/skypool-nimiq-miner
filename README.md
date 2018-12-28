@@ -32,6 +32,7 @@ node index.js --address=<address> [--name=<name>] [--thread=<thread>] [--server=
 ---
 
 # Skypool Nimiq Proxy
+[Step by step tutorial for using proxy](https://github.com/skypool-org/skypool-nimiq-miner/wiki/Proxy-tutorial)
 
 ## Why to use proxy
 * Use Proxy if the Skypool nodes are blocked by cloud providers, e.g., Google Cloud Platform
